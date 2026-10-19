@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
-import { Input } from '../ui/Input'
-import { Avatar } from '../ui/Avatar'
 import { Task, BoardList, BoardMember } from '../../types/database'
 import { formatDateTimeBR } from '../../lib/utils'
 import {
@@ -13,8 +11,7 @@ import {
   Trash2,
   Clock,
   Check,
-  AlignLeft,
-  X
+  AlignLeft
 } from 'lucide-react'
 
 export interface TaskDetailModalProps {
@@ -45,7 +42,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const [assigneeId, setAssigneeId] = useState<string | null>(null)
   const [currentListId, setCurrentListId] = useState('')
   const [isSaving, setIsSaving] = useState(false)
-  const [hasChanges, setHasChanges] = useState(false)
+  const [, setHasChanges] = useState(false)
 
   useEffect(() => {
     if (task) {
@@ -69,7 +66,6 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     if (!title.trim()) return
     setIsSaving(true)
     try {
-      // Se a lista mudou
       if (currentListId !== task.list_id) {
         await onMoveTask(task.id, task.list_id, currentListId, 0)
       }
@@ -101,8 +97,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         {/* Header with Title and Delete Button */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <span className="text-[11px] font-semibold text-indigo-600 uppercase tracking-wider block mb-1">
-              Detalhes do Cartão
+            <span className="text-[11px] font-bold text-ccj-navy dark:text-indigo-400 uppercase tracking-wider block mb-1">
+              Detalhes da Tarefa
             </span>
             <input
               type="text"
@@ -112,7 +108,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 handleFieldChange()
               }}
               placeholder="Título da tarefa..."
-              className="w-full text-lg sm:text-xl font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-1 transition-colors"
+              className="w-full text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-slate-700 focus:border-ccj-navy dark:focus:border-indigo-500 focus:outline-none py-1 transition-colors"
             />
           </div>
 
@@ -120,19 +116,19 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             type="button"
             onClick={handleDelete}
             title="Excluir tarefa"
-            className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-2 rounded-xl transition-colors"
+            className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 p-2 rounded-xl transition-colors"
           >
             <Trash2 className="w-5 h-5" />
           </button>
         </div>
 
         {/* Grid Properties (List, Priority, Due Date, Assignee) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200/70 text-xs sm:text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700/70 text-xs sm:text-sm">
           {/* Column / List selector */}
           <div>
-            <label className="flex items-center gap-1.5 font-semibold text-slate-600 mb-1.5">
+            <label className="flex items-center gap-1.5 font-bold text-slate-600 dark:text-slate-300 mb-1.5">
               <Columns className="w-4 h-4 text-slate-400" />
-              <span>Lista</span>
+              <span>Lista / Coluna</span>
             </label>
             <select
               value={currentListId}
@@ -140,7 +136,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 setCurrentListId(e.target.value)
                 handleFieldChange()
               }}
-              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-ccj-navy"
             >
               {lists.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -152,7 +148,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
           {/* Priority selector */}
           <div>
-            <label className="flex items-center gap-1.5 font-semibold text-slate-600 mb-1.5">
+            <label className="flex items-center gap-1.5 font-bold text-slate-600 dark:text-slate-300 mb-1.5">
               <Flag className="w-4 h-4 text-slate-400" />
               <span>Prioridade</span>
             </label>
@@ -162,7 +158,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 setPriority(e.target.value as any)
                 handleFieldChange()
               }}
-              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-ccj-navy"
             >
               <option value="low">🟢 Baixa</option>
               <option value="medium">🟡 Média</option>
@@ -172,7 +168,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
           {/* Assignee selector (Restricted to board members) */}
           <div>
-            <label className="flex items-center gap-1.5 font-semibold text-slate-600 mb-1.5">
+            <label className="flex items-center gap-1.5 font-bold text-slate-600 dark:text-slate-300 mb-1.5">
               <User className="w-4 h-4 text-slate-400" />
               <span>Responsável</span>
             </label>
@@ -182,7 +178,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 setAssigneeId(e.target.value || null)
                 handleFieldChange()
               }}
-              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-ccj-navy"
             >
               <option value="">Nenhum responsável</option>
               {members.map((m) => (
@@ -195,7 +191,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
           {/* Due date picker */}
           <div>
-            <label className="flex items-center gap-1.5 font-semibold text-slate-600 mb-1.5">
+            <label className="flex items-center gap-1.5 font-bold text-slate-600 dark:text-slate-300 mb-1.5">
               <Calendar className="w-4 h-4 text-slate-400" />
               <span>Data de Entrega</span>
             </label>
@@ -206,14 +202,14 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 setDueDate(e.target.value)
                 handleFieldChange()
               }}
-              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 focus:ring-1 focus:ring-ccj-navy"
             />
           </div>
         </div>
 
         {/* Description Section */}
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
             <AlignLeft className="w-4 h-4 text-slate-400" />
             <span>Descrição da Tarefa</span>
           </label>
@@ -225,12 +221,12 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               handleFieldChange()
             }}
             placeholder="Adicione mais detalhes ou instruções sobre esta tarefa..."
-            className="w-full p-3 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors placeholder:text-slate-400"
+            className="w-full p-3 text-sm bg-slate-50/70 dark:bg-slate-800/70 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-ccj-navy dark:focus:ring-indigo-500 transition-colors placeholder:text-slate-400"
           />
         </div>
 
         {/* Timestamps */}
-        <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400 dark:text-slate-500">
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
             Criado: {formatDateTimeBR(task.created_at)}
@@ -239,7 +235,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </div>
 
         {/* Actions Footer */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
           <Button variant="ghost" onClick={onClose} size="sm">
             Cancelar
           </Button>
@@ -249,6 +245,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             onClick={handleSave}
             isLoading={isSaving}
             leftIcon={<Check className="w-4 h-4" />}
+            className="bg-ccj-navy hover:bg-ccj-navy-light text-white font-bold"
           >
             Salvar Alterações
           </Button>

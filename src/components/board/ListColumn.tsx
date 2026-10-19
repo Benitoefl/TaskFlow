@@ -84,10 +84,10 @@ export const ListColumn: React.FC<ListColumnProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`w-72 sm:w-80 shrink-0 bg-slate-100/90 rounded-2xl p-3 flex flex-col max-h-full border transition-colors ${
+      className={`w-72 sm:w-80 shrink-0 bg-slate-100/90 dark:bg-slate-900/90 rounded-3xl p-3 flex flex-col max-h-full border transition-colors ${
         isDragOver
-          ? 'border-indigo-400 bg-indigo-50/40 ring-2 ring-indigo-200 ring-dashed'
-          : 'border-slate-200/70 shadow-subtle'
+          ? 'border-ccj-navy dark:border-indigo-400 bg-indigo-50/40 dark:bg-slate-800/80 ring-2 ring-indigo-200 dark:ring-indigo-900 ring-dashed'
+          : 'border-slate-200/80 dark:border-slate-800 shadow-subtle'
       }`}
     >
       {/* Column Header */}
@@ -106,11 +106,11 @@ export const ListColumn: React.FC<ListColumnProps> = ({
                   setIsEditingTitle(false)
                 }
               }}
-              className="w-full text-sm font-semibold px-2 py-1 bg-white border border-indigo-400 rounded-lg focus:outline-none"
+              className="w-full text-sm font-semibold px-2 py-1 bg-white dark:bg-slate-800 border border-ccj-navy dark:border-indigo-400 text-slate-900 dark:text-white rounded-lg focus:outline-none"
             />
             <button
               onClick={handleSaveTitle}
-              className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
+              className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded"
               title="Salvar"
             >
               <Check className="w-4 h-4" />
@@ -120,7 +120,7 @@ export const ListColumn: React.FC<ListColumnProps> = ({
                 setTitleValue(list.name)
                 setIsEditingTitle(false)
               }}
-              className="p-1 text-slate-400 hover:bg-slate-200 rounded"
+              className="p-1 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
               title="Cancelar"
             >
               <X className="w-4 h-4" />
@@ -129,10 +129,10 @@ export const ListColumn: React.FC<ListColumnProps> = ({
         ) : (
           <div
             onClick={() => setIsEditingTitle(true)}
-            className="flex items-center gap-2 cursor-pointer group py-1 px-1.5 rounded-lg hover:bg-slate-200/60 transition-colors flex-1 min-w-0"
+            className="flex items-center gap-2 cursor-pointer group py-1 px-1.5 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors flex-1 min-w-0"
           >
-            <h3 className="text-sm font-bold text-slate-800 truncate">{list.name}</h3>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/80 text-slate-600">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{list.name}</h3>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
               {list.tasks.length}
             </span>
           </div>
@@ -141,20 +141,20 @@ export const ListColumn: React.FC<ListColumnProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 rounded-lg transition-colors"
+            className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-800 rounded-lg transition-colors"
             aria-label="Opções da lista"
           >
             <MoreVertical className="w-4 h-4" />
           </button>
 
           {showMenu && (
-            <div className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-modal border border-slate-200 py-1 z-30 text-xs">
+            <div className="absolute right-0 mt-1 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-modal border border-slate-200 dark:border-slate-700 py-1 z-30 text-xs">
               <button
                 onClick={() => {
                   setShowMenu(false)
                   setIsEditingTitle(true)
                 }}
-                className="w-full px-3 py-2 text-left hover:bg-slate-50 text-slate-700 font-medium"
+                className="w-full px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium"
               >
                 Renomear Lista
               </button>
@@ -165,7 +165,7 @@ export const ListColumn: React.FC<ListColumnProps> = ({
                     onDeleteList(list.id)
                   }
                 }}
-                className="w-full px-3 py-2 text-left hover:bg-rose-50 text-rose-600 font-medium flex items-center gap-1.5"
+                className="w-full px-3 py-2 text-left hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1.5"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Excluir Lista
@@ -178,7 +178,7 @@ export const ListColumn: React.FC<ListColumnProps> = ({
       {/* Cards List container with scroll */}
       <div className="flex-1 overflow-y-auto space-y-2.5 px-0.5 min-h-[50px]">
         {list.tasks.length === 0 && !isAddingTask && (
-          <div className="border border-dashed border-slate-300 rounded-xl p-4 text-center text-xs text-slate-400 select-none">
+          <div className="border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl p-4 text-center text-xs text-slate-400 dark:text-slate-600 select-none">
             Nenhuma tarefa nesta lista
           </div>
         )}
@@ -195,7 +195,7 @@ export const ListColumn: React.FC<ListColumnProps> = ({
 
         {/* Inline Add Task Form */}
         {isAddingTask && (
-          <form onSubmit={handleCreateTask} className="bg-white rounded-xl p-3 border border-indigo-200 shadow-sm space-y-2">
+          <form onSubmit={handleCreateTask} className="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
             <textarea
               autoFocus
               placeholder="Digite o título desta tarefa..."
@@ -209,15 +209,15 @@ export const ListColumn: React.FC<ListColumnProps> = ({
                 }
                 if (e.key === 'Escape') setIsAddingTask(false)
               }}
-              className="w-full text-xs sm:text-sm p-1.5 border-none resize-none focus:outline-none placeholder:text-slate-400"
+              className="w-full text-xs sm:text-sm p-1.5 bg-transparent border-none resize-none focus:outline-none placeholder:text-slate-400 text-slate-900 dark:text-white"
             />
-            <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+            <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700">
               <Button
                 type="submit"
                 size="sm"
                 variant="primary"
                 isLoading={isSubmitting}
-                className="text-xs"
+                className="text-xs bg-ccj-navy hover:bg-ccj-navy-light text-white"
               >
                 Adicionar Cartão
               </Button>
@@ -226,7 +226,7 @@ export const ListColumn: React.FC<ListColumnProps> = ({
                 size="sm"
                 variant="ghost"
                 onClick={() => setIsAddingTask(false)}
-                className="text-xs text-slate-500"
+                className="text-xs text-slate-500 dark:text-slate-400"
               >
                 Cancelar
               </Button>
@@ -240,7 +240,7 @@ export const ListColumn: React.FC<ListColumnProps> = ({
         <div className="pt-2 mt-1">
           <button
             onClick={() => setIsAddingTask(true)}
-            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-slate-200/60 transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-ccj-red dark:hover:text-rose-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Adicionar Cartão

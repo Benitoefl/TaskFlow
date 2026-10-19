@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
 import { LoginPage } from './pages/LoginPage'
@@ -9,6 +10,8 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { BoardPage } from './pages/BoardPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { MyTasksPage } from './pages/MyTasksPage'
+import { CalendarPage } from './pages/CalendarPage'
 import { CreateBoardModal } from './components/dashboard/CreateBoardModal'
 import { supabase, isSupabaseConfigured } from './lib/supabase'
 import { Board } from './types/database'
@@ -61,7 +64,7 @@ const AuthenticatedLayoutWrapper: React.FC = () => {
     const { data: newBoardId, error } = await supabase.rpc('create_board_with_defaults', {
       p_name: name,
       p_description: description || null,
-      p_color: color || '#6366f1',
+      p_color: color || '#1b2d56',
     })
     if (error) throw error
     await fetchSidebarBoards()
@@ -91,27 +94,31 @@ const AuthenticatedLayoutWrapper: React.FC = () => {
 export function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AuthenticatedLayoutWrapper />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/board/:id" element={<BoardPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AuthenticatedLayoutWrapper />}>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/my-tasks" element={<MyTasksPage />} />
+                <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/board/:id" element={<BoardPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Catch-all redirect */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </AuthProvider>
+            {/* Catch-all redirect */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

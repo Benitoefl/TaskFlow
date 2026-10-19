@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,17 +8,27 @@ export default {
   theme: {
     extend: {
       colors: {
+        ccj: {
+          navy: '#1b2d56',
+          'navy-light': '#253d75',
+          'navy-dark': '#101c36',
+          red: '#d9232a',
+          'red-light': '#ea383e',
+          'red-dark': '#b3151b',
+          gold: '#e8891d',
+          flame: '#f97316',
+        },
         brand: {
           50: '#eef2ff',
           100: '#e0e7ff',
           200: '#c7d2fe',
           300: '#a5b4fc',
           400: '#818cf8',
-          500: '#6366f1', // Indigo principal
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
+          500: '#1b2d56', // CCJ Navy como brand principal
+          600: '#15254a',
+          700: '#101c36',
+          800: '#0c1427',
+          900: '#060a14',
         },
       },
       fontFamily: {

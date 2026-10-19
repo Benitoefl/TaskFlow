@@ -49,7 +49,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -59,21 +59,21 @@ export const Modal: React.FC<ModalProps> = ({
           role="dialog"
           aria-modal="true"
           className={cn(
-            'relative transform overflow-hidden rounded-2xl bg-white text-left shadow-modal transition-all w-full border border-slate-200/80 my-8',
+            'relative transform overflow-hidden rounded-3xl bg-white dark:bg-slate-900 text-left shadow-modal transition-all w-full border border-slate-200/80 dark:border-slate-800 my-8 text-slate-800 dark:text-slate-100',
             maxWidthClasses[maxWidth]
           )}
         >
           {/* Header */}
           {(title || description) && (
-            <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-start justify-between">
+            <div className="px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between">
               <div>
-                {title && <h3 className="text-lg font-semibold text-slate-900">{title}</h3>}
-                {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+                {title && <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h3>}
+                {description && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>}
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-slate-400 hover:text-slate-600 rounded-lg p-1 hover:bg-slate-100 transition-colors"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 aria-label="Fechar"
               >
                 <X className="w-5 h-5" />

@@ -1,13 +1,15 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  KanbanSquare,
   LayoutDashboard,
+  CheckSquare,
+  Calendar,
   User,
   Plus,
   ChevronRight,
   X,
-  Sparkles
+  Code2,
+  Heart
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Board } from '../../types/database'
@@ -35,6 +37,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       active: location.pathname === '/dashboard',
     },
     {
+      name: 'Minhas Tarefas',
+      href: '/my-tasks',
+      icon: CheckSquare,
+      active: location.pathname === '/my-tasks',
+    },
+    {
+      name: 'Calendário',
+      href: '/calendar',
+      icon: Calendar,
+      active: location.pathname === '/calendar',
+    },
+    {
       name: 'Meu Perfil',
       href: '/profile',
       icon: User,
@@ -43,35 +57,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ]
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white border-r border-slate-200 w-64 select-none">
-      {/* Brand Header */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100">
-        <Link to="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
-            <KanbanSquare className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="font-bold text-lg text-slate-900 tracking-tight flex items-center gap-1">
-              Task<span className="text-indigo-600">Flow</span>
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 w-64 select-none transition-colors duration-200">
+      {/* Brand Header with CCJ Logo */}
+      <div className="h-20 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+        <Link to="/dashboard" className="flex items-center gap-3 group min-w-0">
+          <img
+            src="/logo-ccj.png"
+            alt="Colégio Coração de Jesus"
+            className="h-10 w-auto object-contain group-hover:scale-105 transition-transform shrink-0"
+          />
+          <div className="min-w-0">
+            <span className="font-extrabold text-base text-ccj-navy dark:text-white tracking-tight flex items-center gap-1 truncate">
+              Task<span className="text-ccj-red">Flow</span>
             </span>
-            <span className="block text-[10px] text-slate-400 font-medium -mt-1 tracking-wider uppercase">
-              Colaborativo
+            <span className="block text-[10px] text-slate-500 dark:text-slate-400 font-semibold tracking-wider uppercase truncate">
+              TI • Coração de Jesus
             </span>
           </div>
         </Link>
         <button
           onClick={onCloseMobile}
-          className="md:hidden text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+          className="md:hidden text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg"
           aria-label="Fechar navegação"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Main Navigation */}
+      {/* Main Navigation Links */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         <div>
-          <p className="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <p className="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
             Navegação
           </p>
           <nav className="space-y-1">
@@ -83,16 +99,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   to={item.href}
                   onClick={onCloseMobile}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                    'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
                     item.active
-                      ? 'bg-indigo-50 text-indigo-700 font-semibold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-ccj-navy text-white font-semibold shadow-sm'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                   )}
                 >
                   <Icon
                     className={cn(
                       'w-4 h-4 shrink-0',
-                      item.active ? 'text-indigo-600' : 'text-slate-400'
+                      item.active ? 'text-white' : 'text-slate-400 dark:text-slate-500'
                     )}
                   />
                   <span>{item.name}</span>
@@ -105,15 +121,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Boards List Section */}
         <div>
           <div className="flex items-center justify-between px-3 mb-2">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-              Seus Quadros
+            <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Quadros do Colégio
             </p>
             {onOpenCreateBoard && (
               <button
                 type="button"
                 onClick={onOpenCreateBoard}
                 title="Criar novo quadro"
-                className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 p-1 rounded transition-colors"
+                className="text-slate-400 hover:text-ccj-red hover:bg-rose-50 dark:hover:bg-slate-800 p-1 rounded-lg transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -122,7 +138,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           <div className="space-y-1">
             {boards.length === 0 ? (
-              <div className="px-3 py-3 text-xs text-slate-400 bg-slate-50/60 rounded-lg text-center">
+              <div className="px-3 py-3 text-xs text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-center">
                 Nenhum quadro ainda
               </div>
             ) : (
@@ -134,20 +150,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     to={`/board/${board.id}`}
                     onClick={onCloseMobile}
                     className={cn(
-                      'flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors group',
+                      'flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors group',
                       isActive
-                        ? 'bg-slate-100 text-slate-900 font-semibold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                     )}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span
-                        className="w-3 h-3 rounded-full shrink-0 shadow-sm"
-                        style={{ backgroundColor: board.color || '#6366f1' }}
+                        className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                        style={{ backgroundColor: board.color || '#1b2d56' }}
                       />
                       <span className="truncate">{board.name}</span>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
                 )
               })
@@ -156,14 +172,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Free Plan Badge Footer */}
-      <div className="p-3 border-t border-slate-100 bg-slate-50/50">
-        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-slate-200/70 text-xs text-slate-600 shadow-subtle">
-          <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-          <div className="min-w-0">
-            <span className="font-semibold text-slate-800 block truncate">100% Gratuito</span>
-            <span className="text-[11px] text-slate-500 truncate block">Supabase Free & Cloud</span>
+      {/* Author & Institutional Credits Footer */}
+      <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40">
+        <div className="px-3 py-2.5 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-subtle space-y-1">
+          <div className="flex items-center gap-1.5 text-ccj-navy dark:text-indigo-400 font-bold">
+            <Code2 className="w-3.5 h-3.5 text-ccj-red shrink-0" />
+            <span className="truncate">TI • Benito Lopes</span>
           </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 leading-tight">
+            Colégio Coração de Jesus
+            <Heart className="w-2.5 h-2.5 text-ccj-red fill-ccj-red shrink-0 inline" />
+          </p>
         </div>
       </div>
     </div>

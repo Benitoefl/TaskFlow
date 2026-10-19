@@ -12,10 +12,8 @@ import {
   Plus,
   Share2,
   Trash2,
-  Radio,
   AlertCircle,
-  ArrowLeft,
-  Crown
+  ArrowLeft
 } from 'lucide-react'
 
 export const BoardPage: React.FC = () => {
@@ -62,7 +60,7 @@ export const BoardPage: React.FC = () => {
   }
 
   const handleDragStart = (
-    e: React.DragEvent,
+    _e: React.DragEvent,
     taskId: string,
     sourceListId: string
   ) => {
@@ -73,7 +71,6 @@ export const BoardPage: React.FC = () => {
     if (!draggedTaskInfo) return
     const { sourceListId } = draggedTaskInfo
 
-    // Encontra a lista alvo para determinar a nova posição
     const targetList = lists.find((l) => l.id === targetListId)
     const newPosition = targetList ? targetList.tasks.length : 0
 
@@ -111,19 +108,19 @@ export const BoardPage: React.FC = () => {
   if (error || !board) {
     return (
       <div className="h-full flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-slate-200 p-6 text-center space-y-4 shadow-card">
-          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 text-center space-y-4 shadow-card">
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900">Acesso Negado ou Quadro Inexistente</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Acesso Negado ou Quadro Inexistente</h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {error || 'Você não tem permissão para acessar este quadro ou ele foi excluído.'}
           </p>
           <Button
             variant="primary"
             onClick={() => navigate('/dashboard')}
             leftIcon={<ArrowLeft className="w-4 h-4" />}
-            className="w-full"
+            className="w-full bg-ccj-navy hover:bg-ccj-navy-light text-white font-bold"
           >
             Voltar para o Painel
           </Button>
@@ -133,20 +130,20 @@ export const BoardPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col min-w-0 bg-slate-50">
+    <div className="h-full flex flex-col min-w-0 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
       {/* Board Secondary Header */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <span
             className="w-4 h-4 rounded-full shrink-0 shadow-sm"
-            style={{ backgroundColor: board.color || '#6366f1' }}
+            style={{ backgroundColor: board.color || '#1b2d56' }}
           />
           <div className="min-w-0">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate">
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white truncate">
               {board.name}
             </h2>
             {board.description && (
-              <p className="text-xs text-slate-500 truncate hidden sm:block">
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate hidden sm:block">
                 {board.description}
               </p>
             )}
@@ -163,11 +160,11 @@ export const BoardPage: React.FC = () => {
                 name={m.profile?.display_name}
                 src={m.profile?.avatar_url}
                 size="sm"
-                className="ring-2 ring-white"
+                className="ring-2 ring-white dark:ring-slate-900"
               />
             ))}
             {members.length > 4 && (
-              <span className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 text-xs font-semibold flex items-center justify-center ring-2 ring-white">
+              <span className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold flex items-center justify-center ring-2 ring-white dark:ring-slate-900">
                 +{members.length - 4}
               </span>
             )}
@@ -177,9 +174,9 @@ export const BoardPage: React.FC = () => {
           <Button
             size="sm"
             variant="outline"
-            leftIcon={<Share2 className="w-3.5 h-3.5 text-indigo-600" />}
+            leftIcon={<Share2 className="w-3.5 h-3.5 text-ccj-red" />}
             onClick={() => setIsShareOpen(true)}
-            className="text-xs font-semibold"
+            className="text-xs font-semibold dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
           >
             Compartilhar ({members.length})
           </Button>
@@ -189,7 +186,7 @@ export const BoardPage: React.FC = () => {
             <button
               onClick={handleDeleteBoard}
               title="Excluir quadro permanentemente"
-              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -220,7 +217,7 @@ export const BoardPage: React.FC = () => {
           {isAddingList ? (
             <form
               onSubmit={handleCreateList}
-              className="bg-white rounded-2xl p-3 border border-indigo-200 shadow-card space-y-2.5"
+              className="bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 shadow-card space-y-2.5"
             >
               <input
                 type="text"
@@ -231,10 +228,10 @@ export const BoardPage: React.FC = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') setIsAddingList(false)
                 }}
-                className="w-full text-sm font-semibold p-2 border border-slate-300 rounded-lg focus:outline-none focus:border-indigo-500"
+                className="w-full text-sm font-semibold p-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 rounded-lg focus:outline-none focus:border-ccj-navy dark:focus:border-indigo-500"
               />
               <div className="flex items-center gap-2">
-                <Button type="submit" size="sm" variant="primary" className="text-xs">
+                <Button type="submit" size="sm" variant="primary" className="text-xs bg-ccj-navy hover:bg-ccj-navy-light text-white">
                   Adicionar Lista
                 </Button>
                 <Button
@@ -242,7 +239,7 @@ export const BoardPage: React.FC = () => {
                   size="sm"
                   variant="ghost"
                   onClick={() => setIsAddingList(false)}
-                  className="text-xs text-slate-500"
+                  className="text-xs text-slate-500 dark:text-slate-400"
                 >
                   Cancelar
                 </Button>
@@ -251,7 +248,7 @@ export const BoardPage: React.FC = () => {
           ) : (
             <button
               onClick={() => setIsAddingList(true)}
-              className="w-full py-3 px-4 bg-slate-200/60 hover:bg-slate-200/90 text-slate-700 hover:text-indigo-600 rounded-2xl border border-dashed border-slate-300 flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
+              className="w-full py-3 px-4 bg-slate-200/60 dark:bg-slate-900/60 hover:bg-slate-200/90 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-ccj-red dark:hover:text-rose-400 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>Adicionar outra lista</span>
