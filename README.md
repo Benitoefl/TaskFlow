@@ -1,31 +1,38 @@
-# 🚀 TaskFlow — Aplicativo Colaborativo de Organização de Tarefas
+# 🏫 TaskFlow CCJ — Gestão Colaborativa de Tarefas
 
-> **TaskFlow** é uma aplicação web moderna inspirada na dinâmica visual e funcional do Trello/Kanban, desenvolvida com foco em colaboração em tempo real, alta segurança com Row Level Security (RLS) e **custo operacional de R$ 0** utilizando planos gratuitos sustentáveis.
+> **TaskFlow CCJ** é uma aplicação web moderna inspirada na dinâmica visual e funcional do Trello/Kanban, desenvolvida para o **Colégio Coração de Jesus**.
+> 
+> **Idealização & Desenvolvimento**: **Benito Lopes** (Setor de Tecnologia da Informação — TI).
+> **Custo Operacional**: **R$ 0 permanente** através de recursos gratuitos de alta disponibilidade (Supabase, Vercel, GitHub).
 
 ---
 
 ## 📋 Sumário
 1. [Visão Geral & Recursos](#-visão-geral--recursos)
-2. [Arquitetura & Tecnologias](#-arquitetura--tecnologias)
-3. [Custo R$ 0 & Limites dos Planos Gratuitos](#-custo-r-0--limites-dos-planos-gratuitos)
-4. [Instruções de Configuração no Supabase](#-instruções-de-configuração-no-supabase)
-5. [Execução Local](#-execução-local)
-6. [Publicação Gratuita na Vercel & GitHub](#-publicação-gratuita-na-vercel--github)
-7. [Checklist de Segurança & RLS](#-checklist-de-segurança--rls)
-8. [Checklist de Testes Colaborativos (Cenários 1 a 7)](#-checklist-de-testes-colaborativos)
+2. [Identidade Visual Institucional & Autoria](#-identidade-visual-institucional--autoria)
+3. [Arquitetura & Tecnologias](#-arquitetura--tecnologias)
+4. [Custo R$ 0 & Limites dos Planos Gratuitos](#-custo-r-0--limites-dos-planos-gratuitos)
+5. [Instruções de Configuração no Supabase](#-instruções-de-configuração-no-supabase)
+6. [Execução Local](#-execução-local)
+7. [Publicação Gratuita na Vercel & GitHub](#-publicação-gratuita-na-vercel--github)
+8. [Checklist de Segurança & RLS](#-checklist-de-segurança--rls)
+9. [Checklist de Testes Colaborativos](#-checklist-de-testes-colaborativos)
 
 ---
 
 ## 🌟 Visão Geral & Recursos
 
-- **Quadros Kanban Interativos**: Crie, renomeie, personalize cores e organize múltiplos quadros.
+- **Identidade do Colégio Coração de Jesus**: Logotipo oficial, cores institucionais (Azul Marinho e Vermelho Carmesim) e créditos da TI.
+- **Modo Escuro / Claro (Dark & Light Mode)**: Alternador instantâneo com persistência de preferências visuais.
+- **Aba "Minhas Tarefas"**: Painel consolidado que lista todas as tarefas atribuídas ao usuário logado em todos os quadros com filtros inteligentes (Em Aberto, Concluídas, Atrasadas).
+- **Calendário Mensal de Prazos**: Visão de calendário interativa onde tarefas com data de entrega são automaticamente mapeadas nos dias correspondentes.
+- **Quadros Kanban Interativos**: Crie, renomeie, personalize cores e organize múltiplos quadros por setor ou projeto.
 - **Listas & Cartões com Drag and Drop**: Movimentação fluida de cartões entre colunas com persistência imediata na nuvem.
 - **Colaboração em Tempo Real**: Atualizações automáticas de tarefas e listas via Supabase Realtime sem recarregar a página.
 - **Compartilhamento Seguro**: Convide colegas por e-mail com papéis distintos (*Owner* e *Member*).
 - **Atribuição & Prazos**: Defina prioridades (Baixa, Média, Alta), data de entrega e atribua responsáveis restritos aos membros do quadro.
-- **Autenticação Real**: Cadastro, login, logout, recuperação de senha e gestão de perfil de usuário com avatar.
-- **Responsividade Total**: Layout adaptado para desktop (barra lateral) e mobile (drawer e listas adaptadas sem rolagem horizontal excessiva).
 - **100% em Português Brasileiro**: Datas, horários e termos localizados para `pt-BR`.
+
 
 ---
 
