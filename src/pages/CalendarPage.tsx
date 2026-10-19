@@ -9,6 +9,8 @@ import {
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  ArrowRight,
 } from 'lucide-react'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -28,7 +30,7 @@ interface Profile {
   avatar_url: string | null
 }
 
-type ViewMode = 'month' | 'week' | 'year'
+type ViewMode = 'day' | 'week' | 'month' | 'year'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -43,7 +45,7 @@ const monthNamesShort = [
 ]
 
 const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-const daysOfWeekFull = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+const daysOfWeekFull = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -62,15 +64,76 @@ const getWeekStart = (date: Date) => {
 const formatDateStr = (d: number, m: number, y: number) =>
   `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+const formatFullDate = (date: Date) =>
+  date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+
+// ─── TaskPill ─────────────────────────────────────────────────────────────────
 
 interface TaskPillProps {
   task: CalendarTask
   compact?: boolean
+  expanded?: boolean
 }
 
-const TaskPill: React.FC<TaskPillProps> = ({ task, compact = false }) => {
+const TaskPill: React.FC<TaskPillProps> = ({ task, compact = false, expanded = false }) => {
   const priorityInfo = getPriorityBadge(task.priority)
+
+  if (expanded) {
+    // Card style for Day view
+    return (
+      <Link
+        to={`/board/${task.boardId}`}
+        title={`${task.title} — ${task.boardName} / ${task.listName}`}
+        className="group flex items-start gap-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-700
+          bg-white dark:bg-slate-800/80 hover:shadow-md dark:hover:bg-slate-700
+          transition-all text-left w-full"
+      >
+        {/* Left color bar */}
+        <span
+          className="w-1 self-stretch rounded-full shrink-0"
+          style={{ backgroundColor: task.boardColor }}
+        />
+
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate mb-1">
+            {task.title}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <span className="flex items-center gap-1">
+              <ArrowRight className="w-3 h-3" />
+              {task.boardName}
+            </span>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <span>{task.listName}</span>
+            {task.due_date && (
+              <>
+                <span className="text-slate-300 dark:text-slate-600">·</span>
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {new Date(task.due_date).toLocaleDateString('pt-BR')}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${priorityInfo.bg}`}>
+            {priorityInfo.label}
+          </span>
+          {(task.assigneeName || task.assigneeAvatar) && (
+            <Avatar
+              src={task.assigneeAvatar}
+              name={task.assigneeName}
+              size="sm"
+              className="ring-2 ring-white dark:ring-slate-700"
+            />
+          )}
+        </div>
+      </Link>
+    )
+  }
 
   return (
     <Link
@@ -80,34 +143,193 @@ const TaskPill: React.FC<TaskPillProps> = ({ task, compact = false }) => {
         bg-slate-50 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700
         transition-all text-left shadow-sm w-full overflow-hidden"
     >
-      {/* Board color dot */}
       <span
         className="w-2 h-2 rounded-full shrink-0"
         style={{ backgroundColor: task.boardColor }}
       />
-
-      {/* Title */}
       <p className="text-[11px] font-semibold text-slate-800 dark:text-slate-100 truncate flex-1 min-w-0">
         {task.title}
       </p>
-
-      {/* Assignee avatar */}
-      {task.assigneeName || task.assigneeAvatar ? (
+      {(task.assigneeName || task.assigneeAvatar) && (
         <Avatar
           src={task.assigneeAvatar}
           name={task.assigneeName}
           size="xs"
           className="shrink-0 ring-1 ring-white dark:ring-slate-700"
         />
-      ) : null}
-
-      {/* Priority (hidden in compact) */}
+      )}
       {!compact && (
         <span className={`text-[9px] font-bold px-1 rounded shrink-0 ${priorityInfo.bg}`}>
           {priorityInfo.label}
         </span>
       )}
     </Link>
+  )
+}
+
+// ─── Day View ─────────────────────────────────────────────────────────────────
+
+interface DayViewProps {
+  currentDate: Date
+  tasks: CalendarTask[]
+}
+
+const DayView: React.FC<DayViewProps> = ({ currentDate, tasks }) => {
+  const today = new Date()
+  const isToday = isSameDay(currentDate, today)
+
+  const dateStr = formatDateStr(
+    currentDate.getDate(),
+    currentDate.getMonth(),
+    currentDate.getFullYear()
+  )
+  const dayTasks = tasks.filter((t) => t.due_date?.startsWith(dateStr))
+
+  const dayIndex = currentDate.getDay()
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+      {/* Day header */}
+      <div className={`px-8 py-6 border-b border-slate-200 dark:border-slate-800 ${
+        isToday ? 'bg-indigo-50/60 dark:bg-ccj-navy/20' : 'bg-slate-50/70 dark:bg-slate-950/40'
+      }`}>
+        <div className="flex items-center gap-4">
+          {/* Day number bubble */}
+          <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center shadow-sm ${
+            isToday
+              ? 'bg-ccj-red text-white'
+              : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
+          }`}>
+            <span className="text-2xl font-extrabold leading-none">{currentDate.getDate()}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">
+              {monthNamesShort[currentDate.getMonth()]}
+            </span>
+          </div>
+
+          <div>
+            <p className="text-xl font-extrabold text-slate-900 dark:text-white capitalize">
+              {daysOfWeekFull[dayIndex]}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {currentDate.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              {isToday && (
+                <span className="ml-2 text-xs font-bold bg-ccj-red/10 dark:bg-rose-900/30 text-ccj-red dark:text-rose-400 px-2 py-0.5 rounded-full">
+                  Hoje
+                </span>
+              )}
+            </p>
+          </div>
+
+          <div className="ml-auto text-right">
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">{dayTasks.length}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {dayTasks.length === 1 ? 'tarefa' : 'tarefas'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tasks list */}
+      <div className="p-6 space-y-3">
+        {dayTasks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+              <CalendarIcon className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+            </div>
+            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+              Nenhuma tarefa com prazo neste dia
+            </p>
+          </div>
+        ) : (
+          dayTasks.map((t) => <TaskPill key={t.id} task={t} expanded />)
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Week View ────────────────────────────────────────────────────────────────
+
+interface WeekViewProps {
+  currentDate: Date
+  tasks: CalendarTask[]
+}
+
+const WeekView: React.FC<WeekViewProps> = ({ currentDate, tasks }) => {
+  const today = new Date()
+  const weekStart = getWeekStart(currentDate)
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart)
+    d.setDate(weekStart.getDate() + i)
+    return d
+  })
+
+  const getTasksForDate = (date: Date) => {
+    const dateStr = formatDateStr(date.getDate(), date.getMonth(), date.getFullYear())
+    return tasks.filter((t) => t.due_date?.startsWith(dateStr))
+  }
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+      {/* Header row */}
+      <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40">
+        {weekDays.map((date, idx) => {
+          const isToday = isSameDay(date, today)
+          return (
+            <div
+              key={idx}
+              className={`py-3 px-2 text-center border-r last:border-r-0 border-slate-100 dark:border-slate-800 ${
+                idx === 0 || idx === 6 ? 'bg-rose-50/50 dark:bg-rose-950/10' : ''
+              }`}
+            >
+              <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${
+                idx === 0 || idx === 6
+                  ? 'text-ccj-red dark:text-rose-400'
+                  : 'text-slate-500 dark:text-slate-400'
+              }`}>
+                {daysOfWeek[idx]}
+              </p>
+              <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
+                isToday
+                  ? 'bg-ccj-red text-white shadow-sm'
+                  : 'text-slate-800 dark:text-slate-100'
+              }`}>
+                {date.getDate()}
+              </span>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                {monthNamesShort[date.getMonth()]}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Body */}
+      <div className="grid grid-cols-7 divide-x divide-slate-100 dark:divide-slate-800/80 min-h-[400px]">
+        {weekDays.map((date, idx) => {
+          const dayTasks = getTasksForDate(date)
+          const isToday = isSameDay(date, today)
+
+          return (
+            <div
+              key={idx}
+              className={`p-2 flex flex-col gap-1 transition-colors ${
+                isToday ? 'bg-indigo-50/40 dark:bg-ccj-navy/20' : ''
+              } ${idx === 0 || idx === 6 ? 'bg-rose-50/20 dark:bg-rose-950/5' : ''}`}
+            >
+              {dayTasks.length === 0 ? (
+                <p className="text-[10px] text-slate-300 dark:text-slate-700 text-center mt-4 select-none">
+                  —
+                </p>
+              ) : (
+                dayTasks.map((t) => <TaskPill key={t.id} task={t} />)
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -159,7 +381,6 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, tasks }) => {
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
-      {/* Days of week header */}
       <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 text-center py-3">
         {daysOfWeek.map((day, idx) => (
           <div
@@ -175,7 +396,6 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, tasks }) => {
         ))}
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-7 divide-x divide-y divide-slate-100 dark:divide-slate-800/80">
         {calendarDays.map((cell, index) => {
           const dayTasks = getTasksForDay(cell.day, cell.month, cell.year)
@@ -190,15 +410,12 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, tasks }) => {
                   : 'bg-slate-50/50 dark:bg-slate-950/30 opacity-40'
               } ${isTodayCell ? '!bg-indigo-50/40 dark:!bg-ccj-navy/20' : ''}`}
             >
-              {/* Day number */}
               <div className="flex items-center justify-between mb-1.5">
-                <span
-                  className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ${
-                    isTodayCell
-                      ? 'bg-ccj-red text-white shadow-sm'
-                      : 'text-slate-700 dark:text-slate-300'
-                  }`}
-                >
+                <span className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ${
+                  isTodayCell
+                    ? 'bg-ccj-red text-white shadow-sm'
+                    : 'text-slate-700 dark:text-slate-300'
+                }`}>
                   {cell.day}
                 </span>
                 {dayTasks.length > 0 && (
@@ -207,102 +424,11 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, tasks }) => {
                   </span>
                 )}
               </div>
-
-              {/* Tasks */}
               <div className="space-y-1 flex-1 overflow-y-auto max-h-[90px]">
                 {dayTasks.map((t) => (
                   <TaskPill key={t.id} task={t} compact />
                 ))}
               </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// ─── Week View ────────────────────────────────────────────────────────────────
-
-interface WeekViewProps {
-  currentDate: Date
-  tasks: CalendarTask[]
-}
-
-const WeekView: React.FC<WeekViewProps> = ({ currentDate, tasks }) => {
-  const today = new Date()
-  const weekStart = getWeekStart(currentDate)
-
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(weekStart)
-    d.setDate(weekStart.getDate() + i)
-    return d
-  })
-
-  const getTasksForDate = (date: Date) => {
-    const dateStr = formatDateStr(date.getDate(), date.getMonth(), date.getFullYear())
-    return tasks.filter((t) => t.due_date?.startsWith(dateStr))
-  }
-
-  return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
-      {/* Header row */}
-      <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40">
-        {weekDays.map((date, idx) => {
-          const isToday = isSameDay(date, today)
-          return (
-            <div
-              key={idx}
-              className={`py-3 px-2 text-center border-r last:border-r-0 border-slate-100 dark:border-slate-800 ${
-                idx === 0 || idx === 6 ? 'bg-rose-50/50 dark:bg-rose-950/10' : ''
-              }`}
-            >
-              <p
-                className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${
-                  idx === 0 || idx === 6
-                    ? 'text-ccj-red dark:text-rose-400'
-                    : 'text-slate-500 dark:text-slate-400'
-                }`}
-              >
-                {daysOfWeek[idx]}
-              </p>
-              <span
-                className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
-                  isToday
-                    ? 'bg-ccj-red text-white shadow-sm'
-                    : 'text-slate-800 dark:text-slate-100'
-                }`}
-              >
-                {date.getDate()}
-              </span>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-                {monthNamesShort[date.getMonth()]}
-              </p>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Body */}
-      <div className="grid grid-cols-7 divide-x divide-slate-100 dark:divide-slate-800/80 min-h-[400px]">
-        {weekDays.map((date, idx) => {
-          const dayTasks = getTasksForDate(date)
-          const isToday = isSameDay(date, today)
-
-          return (
-            <div
-              key={idx}
-              className={`p-2 flex flex-col gap-1 transition-colors ${
-                isToday ? 'bg-indigo-50/40 dark:bg-ccj-navy/20' : ''
-              } ${idx === 0 || idx === 6 ? 'bg-rose-50/20 dark:bg-rose-950/5' : ''}`}
-            >
-              {dayTasks.length === 0 ? (
-                <p className="text-[10px] text-slate-300 dark:text-slate-700 text-center mt-4 select-none">
-                  —
-                </p>
-              ) : (
-                dayTasks.map((t) => <TaskPill key={t.id} task={t} />)
-              )}
             </div>
           )
         })}
@@ -323,11 +449,6 @@ const YearView: React.FC<YearViewProps> = ({ currentDate, tasks, onSelectMonth }
   const year = currentDate.getFullYear()
   const today = new Date()
 
-  const getTasksForMonthDay = (month: number, day: number): CalendarTask[] => {
-    const dateStr = formatDateStr(day, month, year)
-    return tasks.filter((t) => t.due_date?.startsWith(dateStr))
-  }
-
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
       {Array.from({ length: 12 }, (_, monthIdx) => {
@@ -335,7 +456,6 @@ const YearView: React.FC<YearViewProps> = ({ currentDate, tasks, onSelectMonth }
         const daysInMonth = new Date(year, monthIdx + 1, 0).getDate()
         const isCurrentMonth = today.getMonth() === monthIdx && today.getFullYear() === year
 
-        // Count tasks for this month
         const taskDays = new Set<number>()
         tasks.forEach((t) => {
           if (!t.due_date) return
@@ -355,15 +475,12 @@ const YearView: React.FC<YearViewProps> = ({ currentDate, tasks, onSelectMonth }
                 : 'border-slate-200 dark:border-slate-800 shadow-sm'
             }`}
           >
-            {/* Month label */}
             <div className="flex items-center justify-between mb-3">
-              <span
-                className={`text-sm font-bold ${
-                  isCurrentMonth
-                    ? 'text-ccj-navy dark:text-indigo-400'
-                    : 'text-slate-700 dark:text-slate-200'
-                }`}
-              >
+              <span className={`text-sm font-bold ${
+                isCurrentMonth
+                  ? 'text-ccj-navy dark:text-indigo-400'
+                  : 'text-slate-700 dark:text-slate-200'
+              }`}>
                 {monthNames[monthIdx]}
               </span>
               {taskDays.size > 0 && (
@@ -373,21 +490,15 @@ const YearView: React.FC<YearViewProps> = ({ currentDate, tasks, onSelectMonth }
               )}
             </div>
 
-            {/* Mini calendar grid */}
             <div className="grid grid-cols-7 gap-0.5">
-              {/* Week header */}
               {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
                 <div key={i} className="text-center text-[8px] text-slate-400 dark:text-slate-600 font-semibold">
                   {d}
                 </div>
               ))}
-
-              {/* Empty cells before first day */}
               {Array.from({ length: firstDay }, (_, i) => (
                 <div key={`empty-${i}`} />
               ))}
-
-              {/* Days */}
               {Array.from({ length: daysInMonth }, (_, i) => {
                 const day = i + 1
                 const isToday =
@@ -425,7 +536,7 @@ const YearView: React.FC<YearViewProps> = ({ currentDate, tasks, onSelectMonth }
 export const CalendarPage: React.FC = () => {
   const { user } = useAuth()
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [viewMode, setViewMode] = useState<ViewMode>('month')
+  const [viewMode, setViewMode] = useState<ViewMode>('month') // ← Mês como padrão
   const [tasks, setTasks] = useState<CalendarTask[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -440,7 +551,6 @@ export const CalendarPage: React.FC = () => {
     try {
       setLoading(true)
 
-      // 1. Boards the user has access to
       const { data: userBoards, error: boardsError } = await supabase
         .from('board_members')
         .select(`board_id, boards:boards!board_id (id, name, color)`)
@@ -459,13 +569,8 @@ export const CalendarPage: React.FC = () => {
         }
       })
 
-      if (boardIds.length === 0) {
-        setTasks([])
-        setLoading(false)
-        return
-      }
+      if (boardIds.length === 0) { setTasks([]); setLoading(false); return }
 
-      // 2. Lists within those boards
       const { data: listsData, error: listsError } = await supabase
         .from('lists')
         .select('id, board_id, name')
@@ -481,13 +586,8 @@ export const CalendarPage: React.FC = () => {
         listIds.push(l.id)
       })
 
-      if (listIds.length === 0) {
-        setTasks([])
-        setLoading(false)
-        return
-      }
+      if (listIds.length === 0) { setTasks([]); setLoading(false); return }
 
-      // 3. Tasks with a due_date
       const { data: tasksData, error: tasksError } = await supabase
         .from('tasks')
         .select('*')
@@ -496,7 +596,7 @@ export const CalendarPage: React.FC = () => {
 
       if (tasksError) throw tasksError
 
-      // 4. Fetch assignee profiles separately (avoids PostgREST schema cache error)
+      // Fetch assignee profiles separately (avoids PostgREST schema cache error)
       const assigneeIds = [
         ...new Set((tasksData || []).map((t: any) => t.assignee_id).filter(Boolean)),
       ]
@@ -514,7 +614,6 @@ export const CalendarPage: React.FC = () => {
         })
       }
 
-      // 5. Map everything together
       const mappedTasks: CalendarTask[] = (tasksData || []).map((t: any) => {
         const listInfo = listsMap[t.list_id]
         const boardId = listInfo ? listInfo.boardId : ''
@@ -540,21 +639,17 @@ export const CalendarPage: React.FC = () => {
     }
   }
 
-  useEffect(() => {
-    fetchCalendarTasks()
-  }, [user])
+  useEffect(() => { fetchCalendarTasks() }, [user])
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
   const navigate = (direction: -1 | 1) => {
-    if (viewMode === 'month') {
-      setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + direction, 1))
+    if (viewMode === 'day') {
+      setCurrentDate((d) => { const n = new Date(d); n.setDate(d.getDate() + direction); return n })
     } else if (viewMode === 'week') {
-      setCurrentDate((d) => {
-        const next = new Date(d)
-        next.setDate(d.getDate() + direction * 7)
-        return next
-      })
+      setCurrentDate((d) => { const n = new Date(d); n.setDate(d.getDate() + direction * 7); return n })
+    } else if (viewMode === 'month') {
+      setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + direction, 1))
     } else {
       setCurrentDate((d) => new Date(d.getFullYear() + direction, d.getMonth(), 1))
     }
@@ -562,7 +657,7 @@ export const CalendarPage: React.FC = () => {
 
   const goToToday = () => setCurrentDate(new Date())
 
-  // ── Date label in the header ───────────────────────────────────────────────
+  // ── Header label ───────────────────────────────────────────────────────────
 
   const getHeaderLabel = () => {
     const y = currentDate.getFullYear()
@@ -570,11 +665,14 @@ export const CalendarPage: React.FC = () => {
 
     if (viewMode === 'year') return `${y}`
     if (viewMode === 'month') return `${monthNames[m]} ${y}`
-
-    // Week
+    if (viewMode === 'day') {
+      return currentDate.toLocaleDateString('pt-BR', {
+        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+      })
+    }
+    // week
     const ws = getWeekStart(currentDate)
-    const we = new Date(ws)
-    we.setDate(ws.getDate() + 6)
+    const we = new Date(ws); we.setDate(ws.getDate() + 6)
     const sameMonth = ws.getMonth() === we.getMonth()
     if (sameMonth) {
       return `${ws.getDate()}–${we.getDate()} de ${monthNames[ws.getMonth()]} ${ws.getFullYear()}`
@@ -582,21 +680,19 @@ export const CalendarPage: React.FC = () => {
     return `${ws.getDate()} ${monthNamesShort[ws.getMonth()]} – ${we.getDate()} ${monthNamesShort[we.getMonth()]} ${we.getFullYear()}`
   }
 
-  // ── Year view: click on a month → switch to month view ────────────────────
+  // ── Year: click month → switch to month view ───────────────────────────────
   const handleSelectMonth = (monthIdx: number) => {
     setCurrentDate(new Date(currentDate.getFullYear(), monthIdx, 1))
     setViewMode('month')
   }
 
-  // ── Total tasks in current period (for status bar) ─────────────────────────
+  // ── Period task count (status bar) ─────────────────────────────────────────
   const periodTaskCount = (() => {
     const y = currentDate.getFullYear()
     const m = currentDate.getMonth()
+
     if (viewMode === 'year') {
-      return tasks.filter((t) => {
-        const d = t.due_date ? new Date(t.due_date) : null
-        return d && d.getFullYear() === y
-      }).length
+      return tasks.filter((t) => t.due_date && new Date(t.due_date).getFullYear() === y).length
     }
     if (viewMode === 'month') {
       return tasks.filter((t) => {
@@ -604,16 +700,27 @@ export const CalendarPage: React.FC = () => {
         return d && d.getFullYear() === y && d.getMonth() === m
       }).length
     }
+    if (viewMode === 'day') {
+      const dateStr = formatDateStr(currentDate.getDate(), m, y)
+      return tasks.filter((t) => t.due_date?.startsWith(dateStr)).length
+    }
     // week
     const ws = getWeekStart(currentDate)
-    const we = new Date(ws)
-    we.setDate(ws.getDate() + 7)
+    const we = new Date(ws); we.setDate(ws.getDate() + 7)
     return tasks.filter((t) => {
       if (!t.due_date) return false
       const d = new Date(t.due_date)
       return d >= ws && d < we
     }).length
   })()
+
+  // ── View mode buttons (ordered: Dia → Semana → Mês → Ano) ─────────────────
+  const viewModes: { key: ViewMode; label: string }[] = [
+    { key: 'day',   label: 'Dia' },
+    { key: 'week',  label: 'Semana' },
+    { key: 'month', label: 'Mês' },
+    { key: 'year',  label: 'Ano' },
+  ]
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -643,24 +750,24 @@ export const CalendarPage: React.FC = () => {
         {/* Controls */}
         <div className="flex flex-wrap items-center gap-2">
 
-          {/* View mode toggle */}
+          {/* View mode toggle — Dia | Semana | Mês | Ano */}
           <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-0.5 shadow-sm">
-            {(['month', 'week', 'year'] as ViewMode[]).map((v) => (
+            {viewModes.map(({ key, label }) => (
               <button
-                key={v}
-                onClick={() => setViewMode(v)}
+                key={key}
+                onClick={() => setViewMode(key)}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                  viewMode === v
+                  viewMode === key
                     ? 'bg-ccj-navy dark:bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                {v === 'month' ? 'Mês' : v === 'week' ? 'Semana' : 'Ano'}
+                {label}
               </button>
             ))}
           </div>
 
-          {/* Today button */}
+          {/* Today */}
           <button
             onClick={goToToday}
             className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
@@ -677,7 +784,7 @@ export const CalendarPage: React.FC = () => {
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 px-3 min-w-[140px] text-center">
+            <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 px-3 min-w-[150px] text-center">
               {getHeaderLabel()}
             </span>
             <button
@@ -698,18 +805,10 @@ export const CalendarPage: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* ── Month View ─────────────────────────────────────────────────── */}
-          {viewMode === 'month' && (
-            <MonthView currentDate={currentDate} tasks={tasks} />
-          )}
-
-          {/* ── Week View ──────────────────────────────────────────────────── */}
-          {viewMode === 'week' && (
-            <WeekView currentDate={currentDate} tasks={tasks} />
-          )}
-
-          {/* ── Year View ──────────────────────────────────────────────────── */}
-          {viewMode === 'year' && (
+          {viewMode === 'day'   && <DayView   currentDate={currentDate} tasks={tasks} />}
+          {viewMode === 'week'  && <WeekView  currentDate={currentDate} tasks={tasks} />}
+          {viewMode === 'month' && <MonthView currentDate={currentDate} tasks={tasks} />}
+          {viewMode === 'year'  && (
             <YearView
               currentDate={currentDate}
               tasks={tasks}
@@ -717,7 +816,7 @@ export const CalendarPage: React.FC = () => {
             />
           )}
 
-          {/* ── Empty state ────────────────────────────────────────────────── */}
+          {/* Empty state */}
           {tasks.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
